@@ -8,7 +8,9 @@ import packageJson from './package.json'
 const plugins = [
   json(),
   resolve({
-    mainFields: ['module', 'main', 'jsnext:main', 'browser'],
+    browser: false,
+    preferBuiltins: true,
+    mainFields: ['module', 'main', 'jsnext:main'],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
   }),
   typescript({
@@ -19,32 +21,9 @@ const plugins = [
   commonjs(),
 ]
 
-const buildEsm = {
-  input: ['src/index.ts'],
-  output: {
-    format: 'esm',
-    entryFileNames: '[name].js',
-    chunkFileNames: '[name]-deps.js',
-    dir: path.dirname(packageJson.module),
-  },
-  plugins,
-}
-
-const buildUmd = {
-  input: 'src/index.ts',
-  output: {
-    format: 'umd',
-    esModule: false,
-    file: packageJson.main,
-    name: packageJson.name.replace(/(?:^|-)(\w)/g, (_, letter) =>
-      letter.toUpperCase(),
-    ),
-  },
-  plugins,
-}
-
 const buildCjs = {
   input: 'src/index.ts',
+  external: Object.keys(packageJson.peerDependencies || {}),
   output: {
     format: 'cjs',
     file: path.resolve(path.dirname(packageJson.types), 'cjs/index.js'),
@@ -52,4 +31,4 @@ const buildCjs = {
   plugins,
 }
 
-export default [buildEsm, buildUmd, buildCjs]
+export default [buildCjs]

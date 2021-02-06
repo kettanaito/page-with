@@ -2,8 +2,7 @@
   "name": "page-with",
   "version": "0.0.0",
   "description": "Test libraries in a browser by spawning an automated page with a given usage example. Test like your users.",
-  "main": "lib/umd/index.js",
-  "module": "lib/esm/index.js",
+  "main": "lib/cjs/index.js",
   "types": "lib/index.d.ts",
   "repository": "git@github.com:kettanaito/page-with.git",
   "author": "Artem Zakharchenko <kettanaito@gmail.com>",
@@ -51,12 +50,15 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.5.0",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
+    "typescript": "^4.1.3",
+    "webpack": "^5.21.1"
   },
   "dependencies": {
     "@types/webpack": "^4.41.26",
     "memfs": "^3.2.0",
-    "playwright": "^1.8.0",
+    "playwright": "^1.8.0"
+  },
+  "peerDependencies": {
     "webpack": "^5.21.1"
   }
 }
