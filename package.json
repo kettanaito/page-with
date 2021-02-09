@@ -1,7 +1,7 @@
 {
   "name": "page-with",
   "version": "0.1.0",
-  "description": "Test libraries in a browser by spawning an automated page with a given usage example. Test like your users.",
+  "description": "A library for testing in-browser based usage scenarios of your libraries.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "git@github.com:kettanaito/page-with.git",
