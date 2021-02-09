@@ -1,2 +1,2 @@
 export * from './createBrowser'
-export * from './scenario'
+export * from './pageWith'

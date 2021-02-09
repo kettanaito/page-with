@@ -1,33 +1,24 @@
-import { scenario } from 'src/index'
+import { pageWith } from 'src/index'
 
 test('opens a browser with the given usage example', async () => {
-  const { page } = await scenario({
-    usage: 'test/fixtures/hello.js',
+  const { page } = await pageWith({
+    example: 'test/fixtures/hello.js',
   })
 
-  const bodyText = await page.textContent('body')
-
-  expect(bodyText).toBe('hello')
-})
-
-test('opens the same scenario when opening a new page', async () => {
-  const { newPage } = await scenario({
-    usage: 'test/fixtures/hello.js',
-  })
-  const page = await newPage()
-  const bodyText = await page.textContent('body')
+  const bodyText = await page.textContent('#text')
 
   expect(bodyText).toBe('hello')
 })
 
 test('supports multiple independent pages', async () => {
-  const firstScenario = await scenario({
-    usage: 'test/fixtures/hello.js',
-  })
-  const secondScenario = await scenario({
-    usage: 'test/fixtures/goodbye.js',
+  const first = await pageWith({
+    example: 'test/fixtures/hello.js',
   })
 
-  expect(await firstScenario.page.textContent('body')).toBe('hello')
-  expect(await secondScenario.page.textContent('body')).toBe('goodbye')
+  const second = await pageWith({
+    example: 'test/fixtures/goodbye.js',
+  })
+
+  expect(await first.page.textContent('#text')).toBe('hello')
+  expect(await second.page.textContent('#text')).toBe('goodbye')
 })

@@ -2,14 +2,19 @@
   "compilerOptions": {
     "strict": true,
     "allowJs": false,
+    "module": "CommonJS",
+    "target": "ES2019",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": false,
     "forceConsistentCasingInFileNames": true,
+    "downlevelIteration": true,
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "outDir": "lib",
+    "skipLibCheck": true,
     "declaration": true,
     "declarationDir": "lib",
+    "lib": ["ES2019", "dom"],
     "baseUrl": "./",
     "paths": {
       "src/*": ["src/*"]

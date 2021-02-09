@@ -2,16 +2,16 @@
   "name": "page-with",
   "version": "0.1.0",
   "description": "Test libraries in a browser by spawning an automated page with a given usage example. Test like your users.",
-  "main": "lib/cjs/index.js",
+  "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "git@github.com:kettanaito/page-with.git",
   "author": "Artem Zakharchenko <kettanaito@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "rollup -c rollup.config.ts -w",
+    "start": "tsc -w",
     "lint": "eslint ./{src,test}/**/*.ts",
     "clean": "rimraf ./lib",
-    "build": "yarn lint && yarn clean && rollup -c rollup.config.ts",
+    "build": "yarn lint && yarn clean && tsc",
     "test": "jest",
     "prepublishOnly": "yarn build && yarn test"
   },
@@ -31,9 +31,6 @@
     }
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^11.1.1",
     "@types/jest": "^26.0.20",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
     "@typescript-eslint/parser": "^4.14.2",
@@ -46,17 +43,21 @@
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
-    "rollup": "^2.38.4",
-    "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.5.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3",
     "webpack": "^5.21.1"
   },
   "dependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/express": "^4.17.11",
     "@types/webpack": "^4.41.26",
+    "@types/webpack-merge": "^4.1.5",
+    "debug": "^4.3.1",
+    "express": "^4.17.1",
     "memfs": "^3.2.0",
-    "playwright": "^1.8.0"
+    "playwright": "^1.8.0",
+    "webpack-merge": "^5.7.3"
   },
   "peerDependencies": {
     "webpack": "^5.21.1"
