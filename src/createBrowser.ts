@@ -1,7 +1,6 @@
-import { Configuration } from 'webpack'
 import { debug } from 'debug'
 import { ChromiumBrowser, LaunchOptions, chromium } from 'playwright'
-import { createServer, ServerApi } from './createServer'
+import { ServerApi, ServerOptions, createServer } from './createServer'
 
 const log = debug('pageWith:browser')
 
@@ -15,7 +14,7 @@ export interface CreateBrowserApi {
 
 export interface CreateBrowserOptions {
   launchOptions?: LaunchOptions
-  webpackConfig?: Configuration
+  serverOptions?: ServerOptions
 }
 
 export async function createBrowser(
@@ -38,9 +37,7 @@ export async function createBrowser(
   log('successfully spawned the browser!')
   log('spawning a webpack server...')
 
-  server = await createServer({
-    webpackConfig: options.webpackConfig || {},
-  })
+  server = await createServer(options.serverOptions)
 
   log('successfully spawned the webpack server', server.url)
 

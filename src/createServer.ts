@@ -1,18 +1,19 @@
 import * as fs from 'fs'
+import { createFsFromVolume, Volume } from 'memfs'
 import { Server } from 'http'
 import { AddressInfo } from 'net'
 import * as express from 'express'
 import { Chunk, Configuration, webpack } from 'webpack'
 import { debug } from 'debug'
 import { merge } from 'webpack-merge'
-import { createFsFromVolume, Volume } from 'memfs'
 import { webpackConfig } from './webpack.config'
 
 const log = debug('pageWith:server')
 const memfs = createFsFromVolume(new Volume())
 
-interface CreateServerOptions {
-  webpackConfig: Configuration
+export interface ServerOptions {
+  router?(app: express.Express): void
+  webpackConfig?: Configuration
 }
 
 export interface ServerApi {
@@ -23,6 +24,7 @@ export interface ServerApi {
   ): Promise<{
     url: string
   }>
+  appendRoutes(middleware: (app: express.Express) => void): () => void
   close(): Promise<void>
 }
 
@@ -49,18 +51,21 @@ function makeHtmlWithChunks(chunks: Set<Chunk>) {
 }
 
 export async function createServer(
-  options: CreateServerOptions = {
+  options: ServerOptions = {
     webpackConfig: {},
   },
 ): Promise<ServerApi> {
   const HOST = 'localhost'
-  const config = merge(webpackConfig, options.webpackConfig)
+  const config = merge(webpackConfig, options.webpackConfig || {})
   const app = express()
 
   const cache: Map<
     string,
     { lastModified: number; chunks: Set<Chunk> }
   > = new Map()
+
+  // Append custom routes and middleware.
+  options.router?.(app)
 
   app.get('/example', async (req, res) => {
     const entry = req.query.entry as string
@@ -139,6 +144,17 @@ export async function createServer(
       const exampleUrl = new URL(`/example?entry=${entry}`, url)
 
       return { url: exampleUrl.toString() }
+    },
+    appendRoutes(middleware) {
+      const prevRoutesCount = app._router.stack.length
+      middleware(app)
+      const nextRoutesCount = app._router.stack.length
+
+      return () => {
+        const runtimeRoutesCount = nextRoutesCount - prevRoutesCount
+        log('cleaning up routes...', runtimeRoutesCount)
+        app._router.stack.splice(-runtimeRoutesCount)
+      }
     },
     close() {
       log('closing the server...')
