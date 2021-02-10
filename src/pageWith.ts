@@ -20,7 +20,6 @@ export interface ScenarioApi {
   makeUrl(chunk: string): string
   request: RequestHelperFn
   context: ChromiumBrowserContext
-  debug(): Promise<void>
   consoleSpy: ConsoleMessages
 }
 
