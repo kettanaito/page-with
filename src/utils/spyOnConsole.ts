@@ -1,4 +1,7 @@
 import { Page } from 'playwright'
+import { debug } from 'debug'
+
+const log = debug('pageWith:spyOnConsole')
 
 export type ConsoleMessageType =
   | 'info'
@@ -22,12 +25,20 @@ export type ConsoleMessageType =
 
 export type ConsoleMessages = Map<ConsoleMessageType, string[]>
 
+function removeConsoleStyles(message: string): string {
+  return message.replace(/\(*(%s|%c|color:\S+)\)*\s*/g, '').trim()
+}
+
 export function spyOnConsole(page: Page): ConsoleMessages {
   const messages: ConsoleMessages = new Map()
 
+  log('created a page console spy!')
+
   page.on('console', (message) => {
     const type = message.type() as ConsoleMessageType
-    const text = message.text()
+    const text = removeConsoleStyles(message.text())
+
+    log('[%s] %s', type, text)
 
     messages.set(type, (messages.get(type) || []).concat(text))
   })
