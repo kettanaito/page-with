@@ -12,6 +12,16 @@ export const webpackConfig: Configuration = {
   },
   resolve: {
     modules: ['node_modules', path.resolve(process.cwd(), 'node_modules')],
+    fallback: {
+      os: false,
+      tty: false,
+      net: false,
+      http: false,
+      https: false,
+      timers: false,
+      process: false,
+      util: false,
+    },
   },
   devtool: false,
 }

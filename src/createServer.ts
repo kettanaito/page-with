@@ -4,11 +4,11 @@ import { Server } from 'http'
 import { AddressInfo } from 'net'
 import * as express from 'express'
 import { Chunk, Configuration, webpack } from 'webpack'
-import { debug } from 'debug'
 import { merge } from 'webpack-merge'
 import { webpackConfig } from './webpack.config'
+import { createLogger } from './internal/createLogger'
 
-const log = debug('pageWith:server')
+const log = createLogger('server')
 const memfs = createFsFromVolume(new Volume())
 
 export interface ServerOptions {
@@ -94,7 +94,7 @@ export async function createServer(
     const chunks = await new Promise<Set<Chunk>>((resolve, reject) => {
       compiler.run((error, stats) => {
         if (error) {
-          log('compiler error', error)
+          log('compilation error', error)
           reject(error)
         }
 
@@ -116,7 +116,7 @@ export async function createServer(
       return
     }
 
-    log('caching the compilation', entryStats.mtimeMs, chunks.size)
+    log('cached the compilation under', entryStats.mtimeMs, chunks.size)
     cache.set(entry, {
       lastModified: entryStats.mtimeMs,
       chunks,
@@ -139,7 +139,7 @@ export async function createServer(
     connection,
     url,
     async compileExample(entry) {
-      log('loading example into WDS', entry)
+      log('compiling example...', entry)
 
       const exampleUrl = new URL(`/example?entry=${entry}`, url)
 

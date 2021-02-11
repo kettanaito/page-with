@@ -1,14 +1,14 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import debug from 'debug'
 import { Express } from 'express'
 import { ChromiumBrowserContext, Page } from 'playwright'
 import { browser, server } from './createBrowser'
 import { ServerApi } from './createServer'
 import { RequestHelperFn, createRequestUtil } from './utils/request'
 import { ConsoleMessages, spyOnConsole } from './utils/spyOnConsole'
+import { createLogger } from './internal/createLogger'
 
-const log = debug('pageWith:pageWith')
+const log = createLogger('page')
 
 export interface PageWithOptions {
   example: string

@@ -1,7 +1,7 @@
 import { Page } from 'playwright'
-import { debug } from 'debug'
+import { createLogger } from '../internal/createLogger'
 
-const log = debug('pageWith:spyOnConsole')
+const log = createLogger('consoleSpy')
 
 export type ConsoleMessageType =
   | 'info'

@@ -1,6 +1,6 @@
 # `page-with`
 
-A library for testing in-browser based usage scenarios of your libraries.
+A library for usage example-driven in-browser testing of your own libraries.
 
 ## Motivation
 
@@ -93,6 +93,67 @@ it('hydrates the value from the sessionStorage', async () => {
     return window.value
   })
   expect(hydratedValue).toBe('abc-123')
+})
+```
+
+## Recipes
+
+### Debug mode
+
+Debugging headless automated browsers is not an easy task. That's why `page-with` supports a debug mode in which it will open the browser for you to see and log out all the steps that your test performs into the terminal.
+
+To enable the debug mode pass the `DEBUG` environmental variable to your testing command and scope it down to `pageWith`:
+
+```bash
+$ DEBUG=pageWith npm test
+```
+
+> If necessary, replace `npm test` with the command that runs your automated tests.
+
+Since you see the same browser instance that runs in your test, you will also see all the steps your test makes live.
+
+### Debug breakpoints
+
+You can use the `debug` utility to create a breakpoint at any point of your test.
+
+```js
+import { pageWith, debug } from 'page-with'
+
+it('automates the browser', async () => {
+  const { page } = await pageWith({ example: 'function.usage.js' })
+  // Pause the execution when the page is created.
+  await debug(page)
+
+  await page.evaluate(() => {
+    console.log('Hey, some action!')
+  })
+
+  // Pause the execution after some actions in the test.
+  // See the result of those actions in the opened browser.
+  await debug(page)
+})
+```
+
+> Note that you need to run your test [in debug mode](#debug-mode) to see the automated browser open.
+
+### Custom webpack configuration
+
+This library compiles your usage example in the local server. To extend the webpack configuration used to compile your example pass the partial webpack config to the `serverOptions.webpackConfig` option of `createBrowser`.
+
+```js
+import path from 'path'
+import { createBrowser } from 'page-with'
+
+const browser = createBrowser({
+  serverOptions: {
+    webpackConfig: {
+      resolve: {
+        alias: {
+          'my-lib': path.resolve(__dirname, '../lib'),
+        },
+      },
+    },
+  },
 })
 ```
 

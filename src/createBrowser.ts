@@ -1,8 +1,8 @@
-import { debug } from 'debug'
 import { ChromiumBrowser, LaunchOptions, chromium } from 'playwright'
 import { ServerApi, ServerOptions, createServer } from './createServer'
+import { createLogger } from './internal/createLogger'
 
-const log = debug('pageWith:browser')
+const log = createLogger('browser')
 
 export let browser: ChromiumBrowser
 export let server: ServerApi
