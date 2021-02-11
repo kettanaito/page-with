@@ -4,6 +4,7 @@ import debug from 'debug'
 import { Express } from 'express'
 import { ChromiumBrowserContext, Page } from 'playwright'
 import { browser, server } from './createBrowser'
+import { ServerApi } from './createServer'
 import { RequestHelperFn, createRequestUtil } from './utils/request'
 import { ConsoleMessages, spyOnConsole } from './utils/spyOnConsole'
 
@@ -21,6 +22,7 @@ export interface ScenarioApi {
   request: RequestHelperFn
   context: ChromiumBrowserContext
   consoleSpy: ConsoleMessages
+  server: ServerApi
 }
 
 /**
@@ -73,5 +75,6 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     },
     request: createRequestUtil(page, server),
     consoleSpy,
+    server,
   }
 }
