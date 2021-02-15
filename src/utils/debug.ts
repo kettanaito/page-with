@@ -8,6 +8,12 @@ declare namespace window {
 const log = createLogger('debug')
 
 export function debug(page: Page) {
+  if (!process.env.DEBUG) {
+    throw new Error(
+      'Failed to add a debugging breakpoint: no "DEBUG" environmental variable found.',
+    )
+  }
+
   log('stopped test execution!')
 
   return new Promise<void>((resolve) => {
