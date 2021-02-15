@@ -13,6 +13,7 @@ const log = createLogger('page')
 
 export interface PageWithOptions {
   example: string
+  template?: string
   routes?(app: Express): void
 }
 
@@ -31,7 +32,7 @@ export interface ScenarioApi {
  * Open a new page with the given usage scenario.
  */
 export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
-  const { example } = options
+  const { example, template } = options
 
   log(`loading example at "${example}"`)
 
@@ -45,6 +46,13 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     throw new Error(
       `Failed to load a scenario at "${fullExamplePath}": given file does not exist.`,
     )
+  }
+
+  if (template) {
+    log('using custom template', template)
+    server.appendRoutes((app) => {
+      app.set('template', template)
+    })
   }
 
   const cleanupRoutes = options.routes

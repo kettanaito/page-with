@@ -28,7 +28,7 @@ export interface ServerApi {
   close(): Promise<void>
 }
 
-function makeHtmlWithChunks(chunks: Set<Chunk>) {
+function makeHtmlWithChunks(chunks: Set<Chunk>, customTemplate?: string) {
   const files = []
   for (const chunk of chunks) {
     for (const filename of chunk.files) {
@@ -40,14 +40,28 @@ function makeHtmlWithChunks(chunks: Set<Chunk>) {
     return memfs.readFileSync(`dist/${filepath}`, 'utf8')
   })
 
-  return `
+  const assets = fileContents
+    .map((content) => `<script>${content}</script>`)
+    .join('\n')
+
+  let template = `
+<!DOCTYPE html>
 <html>
-<body>
-  <h1>Hi from server!</h1>
-  ${fileContents.map((content) => `<script>${content}</script>`)}
-</body>
+  <body>
+  </body>
 </html>
     `
+
+  if (customTemplate) {
+    log('using custom template', customTemplate)
+    template = fs.existsSync(customTemplate)
+      ? fs.readFileSync(customTemplate, 'utf8')
+      : customTemplate
+  }
+
+  log('template for page', template)
+
+  return template.concat(assets)
 }
 
 export async function createServer(
@@ -58,6 +72,7 @@ export async function createServer(
   const HOST = 'localhost'
   const config = merge(webpackConfig, options.webpackConfig || {})
   const app = express()
+  app.set('template', null)
 
   const cache: Map<
     string,
@@ -86,7 +101,9 @@ export async function createServer(
     // if the entry file hasn't changed since the last compilation.
     if (cachedEntry && cachedEntry.lastModified === entryStats.mtimeMs) {
       log('using a cached entry')
-      return res.send(makeHtmlWithChunks(cachedEntry.chunks))
+      return res.send(
+        makeHtmlWithChunks(cachedEntry.chunks, app.get('template')),
+      )
     }
 
     log('no cached entry found, compiling...')
@@ -122,7 +139,7 @@ export async function createServer(
       chunks,
     })
 
-    return res.send(makeHtmlWithChunks(chunks))
+    return res.send(makeHtmlWithChunks(chunks, app.get('template')))
   })
 
   const { url, connection } = await new Promise<{
