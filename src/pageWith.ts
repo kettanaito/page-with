@@ -5,6 +5,7 @@ import { ChromiumBrowserContext, Page } from 'playwright'
 import { browser, server } from './createBrowser'
 import { ServerApi } from './createServer'
 import { RequestHelperFn, createRequestUtil } from './utils/request'
+import { debug } from './utils/debug'
 import { ConsoleMessages, spyOnConsole } from './utils/spyOnConsole'
 import { createLogger } from './internal/createLogger'
 
@@ -19,6 +20,7 @@ export interface ScenarioApi {
   page: Page
   origin: string
   makeUrl(chunk: string): string
+  debug(page?: Page): Promise<void>
   request: RequestHelperFn
   context: ChromiumBrowserContext
   consoleSpy: ConsoleMessages
@@ -72,6 +74,9 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     context,
     makeUrl(chunk) {
       return new URL(chunk, server.url).toString()
+    },
+    debug(customPage) {
+      return debug(customPage || page)
     },
     request: createRequestUtil(page, server),
     consoleSpy,
