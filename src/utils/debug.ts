@@ -7,7 +7,7 @@ declare namespace window {
 
 const log = createLogger('debug')
 
-export function debug(page: Page) {
+export function debug(page: Page): Promise<void> {
   if (!process.env.DEBUG) {
     throw new Error(
       'Failed to add a debugging breakpoint: no "DEBUG" environmental variable found.',
