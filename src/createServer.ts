@@ -7,12 +7,12 @@ import { Chunk, Configuration, webpack } from 'webpack'
 import { merge } from 'webpack-merge'
 import { webpackConfig } from './webpack.config'
 import { createLogger } from './internal/createLogger'
+import { staticFromMemory } from './middleware/staticFromMemory'
 
 const log = createLogger('server')
 const memfs = createFsFromVolume(new Volume())
 
 const PREVIEW_ROUTE = '/preview'
-const ASSETS_PRAGMA = '{% assets %}'
 
 export interface ServerOptions {
   router?(app: express.Express): void
@@ -45,17 +45,9 @@ function makeHtmlWithChunks(chunks: Set<Chunk>, title: string, markup: string) {
     }
   }
 
-  const fileContents = files.map((filepath) => {
-    return memfs.readFileSync(`dist/${filepath}`, 'utf8')
+  const scriptTags = files.map((filePath) => {
+    return `<script type="application/javascript" src="/assets/${filePath}"></script>`
   })
-
-  /**
-   * @todo Reference assets file paths from the memory
-   * instead of injecting inline.
-   */
-  const scriptTags = fileContents.map(
-    (content) => `<script type="application/javascript">${content}</script>`,
-  )
 
   let resolvedMarkup = ''
 
@@ -111,6 +103,9 @@ export async function createServer(
 
     next()
   })
+
+  // Serve compilation assets from memory.
+  app.use('/assets', staticFromMemory(memfs))
 
   app.get<void, any, void, { example: string }>(
     PREVIEW_ROUTE,
