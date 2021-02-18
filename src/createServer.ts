@@ -63,9 +63,13 @@ function makeHtmlWithChunks(chunks: Set<Chunk>, title: string, markup: string) {
 <html>
   <head>
     <title>${title}</title>
-    ${scriptTags.join('\n')}
   </head>
-  <body>${resolvedMarkup}</body>
+  <body>
+    ${resolvedMarkup}
+    <section id="assets">
+      ${scriptTags.join('\n')}
+    </section>
+  </body>
 </html>
     `
 
