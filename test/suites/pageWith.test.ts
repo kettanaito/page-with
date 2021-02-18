@@ -56,3 +56,14 @@ test('supports custom markup', async () => {
   const divContent = await page.textContent('#app')
   expect(divContent).toBe('Custom markup')
 })
+
+test('supports custom content base for the server', async () => {
+  const { request } = await pageWith({
+    example: 'test/fixtures/hello.js',
+    contentBase: 'test/fixtures',
+  })
+
+  const res = await request('/goodbye.js')
+  expect(res.status()).toBe(200)
+  expect(res.headers()['content-type']).toContain('application/javascript')
+})
