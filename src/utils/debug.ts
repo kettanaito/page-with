@@ -14,12 +14,12 @@ export function debug(page: Page): Promise<void> {
     )
   }
 
-  log('stopped test execution!')
+  log('paused test execution!')
 
   return new Promise<void>((resolve) => {
     page.evaluate(() => {
       console.warn(`\
-[pageWith] Stopped test execution!
+[pageWith] Paused test execution!
 Call "window.resume()" on this page to continue running the test.\
 `)
     })

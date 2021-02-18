@@ -13,8 +13,10 @@ const log = createLogger('page')
 
 export interface PageWithOptions {
   example: string
-  template?: string
+  markup?: string
+  contentBase?: string
   routes?(app: Express): void
+  title?: string
 }
 
 export interface ScenarioApi {
@@ -32,7 +34,7 @@ export interface ScenarioApi {
  * Open a new page with the given usage scenario.
  */
 export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
-  const { example, template } = options
+  const { example, markup, contentBase, title } = options
 
   log(`loading example at "${example}"`)
 
@@ -48,21 +50,35 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     )
   }
 
-  if (template) {
-    log('using custom template', template)
-    server.appendRoutes((app) => {
-      app.set('template', template)
-    })
+  if (markup) {
+    log('using a custom markup', markup)
   }
+
+  if (contentBase) {
+    log('using a custom content base', contentBase)
+  }
+
+  server.appendRoutes((app) => {
+    if (title) {
+      app.set('title', title)
+    }
+
+    if (markup) {
+      app.set('markup', markup)
+    }
+
+    if (contentBase) {
+      app.set('contentBase', contentBase)
+    }
+  })
 
   const cleanupRoutes = options.routes
     ? server.appendRoutes(options.routes)
     : null
-  const pendingCompilation = server.compileExample(fullExamplePath)
 
   const [context, compiledExample] = await Promise.all([
     browser.newContext(),
-    pendingCompilation,
+    server.compileExample(fullExamplePath),
   ])
 
   log('Compiled example running at', compiledExample.url)

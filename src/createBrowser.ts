@@ -1,3 +1,4 @@
+import { until } from '@open-draft/until'
 import { ChromiumBrowser, LaunchOptions, chromium } from 'playwright'
 import { ServerApi, ServerOptions, createServer } from './createServer'
 import { createLogger } from './internal/createLogger'
@@ -35,11 +36,19 @@ export async function createBrowser(
   )
 
   log('successfully spawned the browser!')
-  log('spawning a webpack server...')
+  log('spawning a server...')
 
-  server = await createServer(options.serverOptions)
+  const [serverError, serverInstance] = await until(() =>
+    createServer(options.serverOptions),
+  )
 
-  log('successfully spawned the webpack server', server.url)
+  if (serverError) {
+    throw new Error(`Failed to create a server.\n${serverError}`)
+  }
+
+  server = serverInstance
+
+  log('successfully spawned the server', server.url)
 
   async function cleanup() {
     log('cleaning up...')
