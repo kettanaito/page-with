@@ -1,12 +1,12 @@
 import { until } from '@open-draft/until'
 import { ChromiumBrowser, LaunchOptions, chromium } from 'playwright'
-import { ServerApi, ServerOptions, createServer } from './createServer'
 import { createLogger } from './internal/createLogger'
+import { ServerOptions, PreviewServer } from './server/PreviewServer'
 
 const log = createLogger('browser')
 
 export let browser: ChromiumBrowser
-export let server: ServerApi
+export let server: PreviewServer
 
 export interface CreateBrowserApi {
   browser: ChromiumBrowser
@@ -38,17 +38,14 @@ export async function createBrowser(
   log('successfully spawned the browser!')
   log('spawning a server...')
 
-  const [serverError, serverInstance] = await until(() =>
-    createServer(options.serverOptions),
-  )
+  server = new PreviewServer(options.serverOptions)
+  const [serverError, connection] = await until(() => server.listen())
 
   if (serverError) {
     throw new Error(`Failed to create a server.\n${serverError}`)
   }
 
-  server = serverInstance
-
-  log('successfully spawned the server', server.url)
+  log('successfully spawned the server!', connection.url)
 
   async function cleanup() {
     log('cleaning up...')

@@ -8,7 +8,7 @@ export const webpackConfig: Configuration = {
     main: 'DEFINED_LATER',
   },
   output: {
-    filename: 'main.js',
+    filename: 'main.[chunkhash].js',
   },
   resolve: {
     modules: ['node_modules', path.resolve(process.cwd(), 'node_modules')],

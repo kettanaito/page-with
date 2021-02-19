@@ -1,7 +1,7 @@
 import { v4 } from 'uuid'
 import { Page, Response } from 'playwright'
 import { headersToObject } from 'headers-utils'
-import { ServerApi } from 'src/createServer'
+import { PreviewServer } from 'src/server/PreviewServer'
 
 export type RequestHelperFn = (
   url: string,
@@ -11,12 +11,12 @@ export type RequestHelperFn = (
 
 export function createRequestUtil(
   page: Page,
-  server: ServerApi,
+  server: PreviewServer,
 ): RequestHelperFn {
   return (url, init, predicate) => {
     const requestId = v4()
     const resolvedUrl = url.startsWith('/')
-      ? new URL(url, server.url).toString()
+      ? new URL(url, server.connectionInfo?.url).toString()
       : url
 
     const fetchOptions = init || {}

@@ -3,11 +3,11 @@ import * as path from 'path'
 import { Express } from 'express'
 import { ChromiumBrowserContext, Page } from 'playwright'
 import { browser, server } from './createBrowser'
-import { ServerApi } from './createServer'
+import { PreviewServer } from './server/PreviewServer'
+import { createLogger } from './internal/createLogger'
 import { RequestHelperFn, createRequestUtil } from './utils/request'
 import { debug } from './utils/debug'
 import { ConsoleMessages, spyOnConsole } from './utils/spyOnConsole'
-import { createLogger } from './internal/createLogger'
 
 const log = createLogger('page')
 
@@ -27,7 +27,7 @@ export interface ScenarioApi {
   request: RequestHelperFn
   context: ChromiumBrowserContext
   consoleSpy: ConsoleMessages
-  server: ServerApi
+  server: PreviewServer
 }
 
 /**
@@ -38,16 +38,15 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
 
   log(`loading example at "${example}"`)
 
-  const fullExamplePath = path.isAbsolute(example)
-    ? example
-    : path.resolve(process.cwd(), example)
-
-  log(`resolved usage path to "${fullExamplePath}"`)
-
-  if (!fs.existsSync(fullExamplePath)) {
-    throw new Error(
-      `Failed to load a scenario at "${fullExamplePath}": given file does not exist.`,
-    )
+  if (example) {
+    const fullExamplePath = path.isAbsolute(example)
+      ? example
+      : path.resolve(process.cwd(), example)
+    if (!fs.existsSync(fullExamplePath)) {
+      throw new Error(
+        `Failed to load a scenario at "${fullExamplePath}": given file does not exist.`,
+      )
+    }
   }
 
   if (markup) {
@@ -58,7 +57,7 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     log('using a custom content base', contentBase)
   }
 
-  server.appendRoutes((app) => {
+  server.use((app) => {
     if (title) {
       app.set('title', title)
     }
@@ -72,20 +71,21 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     }
   })
 
-  const cleanupRoutes = options.routes
-    ? server.appendRoutes(options.routes)
-    : null
+  const cleanupRoutes = options.routes ? server.use(options.routes) : null
 
-  const [context, compiledExample] = await Promise.all([
+  const [context] = await Promise.all([
     browser.newContext(),
-    server.compileExample(fullExamplePath),
+    server.compile(example),
   ])
 
-  log('Compiled example running at', compiledExample.url)
+  const compilationUrl = server.getCompilationUrl(example)
+  log('compiled example running at', compilationUrl)
 
   const page = await context.newPage()
   const consoleSpy = spyOnConsole(page)
-  await page.goto(compiledExample.url, { waitUntil: 'networkidle' })
+
+  log('navigating to the compiled example...', compilationUrl)
+  await page.goto(compilationUrl, { waitUntil: 'networkidle' })
 
   page.on('close', () => {
     log('closing the page...')
@@ -94,10 +94,10 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
 
   return {
     page,
-    origin: compiledExample.url,
+    origin: compilationUrl,
     context,
     makeUrl(chunk) {
-      return new URL(chunk, server.url).toString()
+      return new URL(chunk, server.connectionInfo?.url).toString()
     },
     debug(customPage) {
       return debug(customPage || page)

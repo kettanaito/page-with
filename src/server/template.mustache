@@ -1,0 +1,12 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    {{{ markup }}}
+    {{#assets}}
+    <script type="application/javascript" src="/assets/{{ . }}"></script>
+    {{/assets}}
+  </body>
+</html>
