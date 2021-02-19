@@ -49,7 +49,9 @@ export async function createBrowser(
 
   async function cleanup() {
     log('cleaning up...')
-    return Promise.all([browser.close(), server.close()]).then(() => void 0)
+    return Promise.all([browser.close(), server.close()]).then(() => {
+      log('successfully cleaned up all resources!')
+    })
   }
 
   process.on('exit', cleanup)

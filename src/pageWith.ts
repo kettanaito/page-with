@@ -36,6 +36,11 @@ export interface ScenarioApi {
 export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
   const { example, markup, contentBase, title } = options
 
+  /**
+   * @todo Pass that `pageId` to the server to establish a unique route
+   * for this page!
+   */
+
   log(`loading example at "${example}"`)
 
   if (example) {
@@ -78,14 +83,18 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
     server.compile(example),
   ])
 
-  const compilationUrl = server.getCompilationUrl(example)
-  log('compiled example running at', compilationUrl)
+  const serverContext = server.createContext(example, {
+    title: options.title,
+    markup: options.markup,
+  })
+
+  log('compiled example running at', serverContext.previewUrl)
 
   const page = await context.newPage()
   const consoleSpy = spyOnConsole(page)
 
-  log('navigating to the compiled example...', compilationUrl)
-  await page.goto(compilationUrl, { waitUntil: 'networkidle' })
+  log('navigating to the compiled example...', serverContext.previewUrl)
+  await page.goto(serverContext.previewUrl, { waitUntil: 'networkidle' })
 
   page.on('close', () => {
     log('closing the page...')
@@ -94,7 +103,7 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
 
   return {
     page,
-    origin: compilationUrl,
+    origin: serverContext.previewUrl,
     context,
     makeUrl(chunk) {
       return new URL(chunk, server.connectionInfo?.url).toString()

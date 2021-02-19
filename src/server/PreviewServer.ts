@@ -4,6 +4,7 @@ import { Server } from 'http'
 import { AddressInfo } from 'net'
 import { until } from '@open-draft/until'
 import * as express from 'express'
+import { v4 } from 'uuid'
 import { IFs, createFsFromVolume, Volume } from 'memfs'
 import { webpack, Chunk, Configuration } from 'webpack'
 import merge from 'webpack-merge'
@@ -30,6 +31,23 @@ interface CacheEntry {
 }
 type Cache = Map<string, CacheEntry>
 
+type PagesMap = Map<
+  string,
+  {
+    entryPath: string
+    options: PageOptions
+  }
+>
+
+interface PageOptions {
+  title?: string
+  markup?: string
+}
+
+interface PageContext {
+  previewUrl: string
+}
+
 export class PreviewServer {
   private options: ServerOptions
   private baseWebpackConfig: Configuration
@@ -37,6 +55,7 @@ export class PreviewServer {
   private app: express.Express
   private connection: Server | null
   private cache: Cache
+  private pages: PagesMap
   private log: debug.Debugger
 
   public connectionInfo: ServerConnectionInfo | null
@@ -53,6 +72,7 @@ export class PreviewServer {
     this.app = express()
     this.connection = null
     this.connectionInfo = null
+    this.pages = new Map()
 
     this.initSettings()
     this.applyMiddleware()
@@ -60,8 +80,6 @@ export class PreviewServer {
   }
 
   private initSettings() {
-    this.app.set('title', 'Preview')
-    this.app.set('markup', null)
     this.app.set('contentBase', null)
   }
 
@@ -89,8 +107,13 @@ export class PreviewServer {
     })
   }
 
-  public async compile(entryPath: string): Promise<Set<Chunk>> {
-    this.log('compiling', entryPath)
+  public async compile(entryPath?: string): Promise<Set<Chunk>> {
+    this.log('compiling entry...', entryPath)
+
+    if (!entryPath) {
+      this.log('no entry given, skipping the compilation')
+      return new Set()
+    }
 
     const absoluteEntryPath = path.isAbsolute(entryPath)
       ? entryPath
@@ -134,14 +157,25 @@ export class PreviewServer {
     return chunks
   }
 
-  public getCompilationUrl(entryPath: string): string {
-    const url = new URL('/preview', this.connectionInfo?.url)
-
-    if (entryPath) {
-      url.searchParams.append('entry', entryPath)
-    }
+  private createPreviewUrl(pageId: string): string {
+    const url = new URL(`/preview/${pageId}`, this.connectionInfo?.url)
+    this.log('created a preview URL for %s (%s)', pageId, url.toString())
 
     return url.toString()
+  }
+
+  public createContext(entryPath: string, options: PageOptions): PageContext {
+    const pageId = v4()
+    this.pages.set(pageId, {
+      entryPath,
+      options,
+    })
+
+    const previewUrl = this.createPreviewUrl(pageId)
+
+    return {
+      previewUrl,
+    }
   }
 
   public use(middleware: (app: express.Express) => void): () => void {
@@ -198,20 +232,32 @@ export class PreviewServer {
   private applyRoutes(): void {
     this.options.router?.(this.app)
 
-    this.app.get<void, unknown, void, { entry: string }>(
-      '/preview',
+    this.app.get<{ pageId: string }, string, void, { entry: string }>(
+      '/preview/:pageId',
       async (req, res) => {
-        this.log('[get] /preview')
-        const { entry } = req.query
-        const chunks = await this.compile(entry)
-        const html = this.renderHtml(chunks)
+        this.log('[get] %s', req.url)
+        const { pageId } = req.params
+        const page = this.pages.get(pageId)
+
+        if (!page) {
+          return res.status(404).end()
+        }
+
+        const chunks = await this.compile(page.entryPath)
+        const html = this.renderHtml(chunks, pageId)
         return res.send(html)
       },
     )
   }
 
-  private renderHtml(chunks: Set<Chunk> | null): string {
+  private renderHtml(chunks: Set<Chunk> | null, pageId: string): string {
     this.log('rendering html...')
+    const page = this.pages.get(pageId)
+
+    if (!page) {
+      return `<p>Page with ID "${pageId}" not found.</p>`
+    }
+
     const assets = []
 
     for (const chunk of chunks || new Set()) {
@@ -225,7 +271,7 @@ export class PreviewServer {
       'utf8',
     )
     let markup = ''
-    const customMarkup = this.app.get('markup')
+    const customMarkup = page?.options.markup
 
     if (customMarkup) {
       markup = fs.existsSync(customMarkup)
@@ -234,7 +280,7 @@ export class PreviewServer {
     }
 
     const html = render(template, {
-      title: 'Preview',
+      title: page?.options.title,
       markup,
       assets,
     })
