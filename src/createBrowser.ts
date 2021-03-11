@@ -21,7 +21,7 @@ export interface CreateBrowserOptions {
 export async function createBrowser(
   options: CreateBrowserOptions = {},
 ): Promise<CreateBrowserApi> {
-  log('spwaning a browser...')
+  log('spawning a browser...')
 
   browser = await chromium.launch(
     Object.assign(
