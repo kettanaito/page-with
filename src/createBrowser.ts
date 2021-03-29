@@ -49,6 +49,12 @@ export async function createBrowser(
 
   async function cleanup() {
     log('cleaning up...')
+
+    if (process.env.DEBUG) {
+      log('cleanup prevented in DEBUG mode')
+      return Promise.resolve()
+    }
+
     return Promise.all([browser.close(), server.close()]).then(() => {
       log('successfully cleaned up all resources!')
     })
