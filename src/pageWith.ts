@@ -17,6 +17,7 @@ export interface PageWithOptions {
   contentBase?: string
   routes?(app: Express): void
   title?: string
+  env?: Record<string, string | number | boolean>
 }
 
 export interface ScenarioApi {
@@ -95,6 +96,15 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
 
   log('navigating to the compiled example...', serverContext.previewUrl)
   await page.goto(serverContext.previewUrl, { waitUntil: 'networkidle' })
+
+  if (options.env) {
+    await page.evaluate((variables) => {
+      variables.forEach(([variableName, value]) => {
+        // @ts-expect-error Adding a custom "window" property.
+        window[variableName] = value
+      })
+    }, Object.entries(options.env))
+  }
 
   page.on('close', () => {
     log('closing the page...')

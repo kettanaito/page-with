@@ -1,5 +1,11 @@
 import { pageWith } from 'src/index'
 
+declare namespace window {
+  export const string: string
+  export const number: number
+  export const boolean: boolean
+}
+
 test('opens a browser with the given usage example', async () => {
   const { page } = await pageWith({
     example: 'test/fixtures/hello.js',
@@ -66,4 +72,23 @@ test('supports custom content base for the server', async () => {
   const res = await request('/goodbye.js')
   expect(res.status()).toBe(200)
   expect(res.headers()['content-type']).toContain('application/javascript')
+})
+
+test('sets the variables from the "env" option on the window', async () => {
+  const { page } = await pageWith({
+    example: 'test/fixtures/hello.js',
+    env: {
+      string: 'yes',
+      number: 2,
+      boolean: true,
+    },
+  })
+
+  const [string, number, boolean] = await page.evaluate(() => {
+    return [window.string, window.number, window.boolean]
+  })
+
+  expect(string).toEqual('yes')
+  expect(number).toEqual(2)
+  expect(boolean).toEqual(true)
 })
