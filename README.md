@@ -96,6 +96,92 @@ it('hydrates the value from the sessionStorage', async () => {
 })
 ```
 
+## Options
+
+### `example`
+
+(_Required_) A relative path to the example module to compile and load in the browser.
+
+```js
+pageWith({
+  example: path.resolve(__dirname, 'example.js'),
+})
+```
+
+### `title`
+
+A custom title of the page. Useful to discern pages when loading multiple scenarios in the same browser.
+
+```js
+pageWith({
+  title: 'My app',
+})
+```
+
+### `markup`
+
+A custom HTML markup of the loaded example.
+
+```js
+pageWith({
+  markup: `
+<body>
+  <button>CLick me</button>
+</body>
+  `,
+})
+```
+
+> Note that the compiled example module will be appended to the markup automatically.
+
+You can also provide a relative path to the HTML file to use as the custom markup:
+
+```js
+pageWith({
+  markup: path.resolve(__dirname, 'markup.html'),
+})
+```
+
+### `contentBase`
+
+A relative path to a directory to use to resolve page's resources. Useful to load static resources (i.e. images) on the runtime.
+
+```js
+pageWith({
+  contentBase: path.resolve(__dirname, 'public'),
+})
+```
+
+### `routes`
+
+A function to customize the Express server instance that runs the local preview of the compiled example.
+
+```js
+pageWith({
+  routes(app) {
+    app.get('/user', (res, res) => {
+      res.status(200).json({ firstName: 'John' })
+    })
+  },
+})
+```
+
+> Making a `GET /user` request in your example module now returns the defined JSON response.
+
+### `env`
+
+Environmental variables to propagate to the browser's `window`.
+
+```js
+pageWith({
+  env: {
+    serverUrl: 'http://localhost:3000',
+  },
+})
+```
+
+> The `serverUrl` variable will be available under `window.serverUrl` in the browser (and your example).
+
 ## Recipes
 
 ### Debug mode
