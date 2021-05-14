@@ -3,7 +3,7 @@ import * as path from 'path'
 import { Express } from 'express'
 import { ChromiumBrowserContext, Page } from 'playwright'
 import { browser, server } from './createBrowser'
-import { PreviewServer } from './server/PreviewServer'
+import { PreviewServer, ServerOptions } from './server/PreviewServer'
 import { createLogger } from './internal/createLogger'
 import { RequestHelperFn, createRequestUtil } from './utils/request'
 import { debug } from './utils/debug'
@@ -18,6 +18,7 @@ export interface PageWithOptions {
   routes?(app: Express): void
   title?: string
   env?: Record<string, string | number | boolean>
+  serverOptions?: ServerOptions
 }
 
 export interface ScenarioApi {
@@ -78,6 +79,12 @@ export async function pageWith(options: PageWithOptions): Promise<ScenarioApi> {
   })
 
   const cleanupRoutes = options.routes ? server.use(options.routes) : null
+
+  if (options.serverOptions) {
+    Object.entries(options.serverOptions).forEach(([name, value]) => {
+      server.setOption(name as any, value)
+    })
+  }
 
   const [context] = await Promise.all([
     browser.newContext(),

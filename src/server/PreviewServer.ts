@@ -17,6 +17,7 @@ import { webpackConfig } from '../webpack.config'
 export interface ServerOptions {
   router?(app: express.Express): void
   webpackConfig?: Configuration
+  compileInMemory?: boolean
 }
 
 interface ServerConnectionInfo {
@@ -48,6 +49,10 @@ interface PageContext {
   previewUrl: string
 }
 
+const DEFAULT_SERVER_OPTIONS: ServerOptions = {
+  compileInMemory: true,
+}
+
 export class PreviewServer {
   private options: ServerOptions
   private baseWebpackConfig: Configuration
@@ -60,9 +65,22 @@ export class PreviewServer {
 
   public connectionInfo: ServerConnectionInfo | null
 
+  public setOption<Name extends keyof ServerOptions>(
+    name: Name,
+    value: ServerOptions[Name],
+  ): void {
+    this.options[name] = value
+
+    if (name === 'webpackConfig') {
+      const prevBaseConfig = this.baseWebpackConfig
+      const nextWebpackConfig = value as any
+      this.baseWebpackConfig = merge(prevBaseConfig, nextWebpackConfig || {})
+    }
+  }
+
   constructor(options: ServerOptions = {}) {
     this.log = createLogger('server')
-    this.options = options
+    this.options = { ...DEFAULT_SERVER_OPTIONS, ...options }
     this.baseWebpackConfig = merge(
       webpackConfig,
       this.options.webpackConfig || {},
@@ -109,6 +127,7 @@ export class PreviewServer {
 
   public async compile(entryPath?: string): Promise<Set<Chunk>> {
     this.log('compiling entry...', entryPath)
+    this.log('compiling to memory?', this.options.compileInMemory)
 
     if (!entryPath) {
       this.log('no entry given, skipping the compilation')
@@ -137,8 +156,18 @@ export class PreviewServer {
       },
     })
     const compiler = webpack(webpackConfig)
-    // @ts-expect-error Incompatible types per official example.
-    compiler.outputFileSystem = this.memoryFs
+
+    this.log('resolved webpack configuration', webpackConfig)
+
+    if (!this.options.compileInMemory) {
+      this.log('compiling to dist:', webpackConfig.output)
+    }
+
+    if (this.options.compileInMemory) {
+      // @ts-expect-error Incompatible types per official example.
+      compiler.outputFileSystem = this.memoryFs
+    }
+
     const [compilationError, stats] = await until(() => asyncCompile(compiler))
 
     if (compilationError) {
