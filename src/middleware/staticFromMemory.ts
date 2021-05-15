@@ -15,6 +15,10 @@ export function staticFromMemory(ifs: IFs): RequestHandler {
       return res.status(404).end()
     }
 
+    const fileStats = ifs.statSync(filePath)
+
+    res.setHeader('Last-Modified', new Date(fileStats.mtimeMs).toUTCString())
+
     const stream = ifs.createReadStream(filePath, 'utf8')
     stream.pipe(res)
 
