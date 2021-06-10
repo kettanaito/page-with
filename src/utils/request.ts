@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 import { Page, Response } from 'playwright'
-import { headersToObject } from 'headers-utils'
+import { Headers, headersToObject } from 'headers-utils'
 import { PreviewServer } from 'src/server/PreviewServer'
 
 export type RequestHelperFn = (
@@ -21,10 +21,7 @@ export function createRequestUtil(
 
     const fetchOptions = init || {}
     const initialHeaders = fetchOptions.headers || {}
-    const requestHeaders =
-      initialHeaders instanceof Headers
-        ? initialHeaders
-        : new Headers(initialHeaders)
+    const requestHeaders = new Headers(initialHeaders)
 
     const identityHeaderName = 'accept-language'
     requestHeaders.set(identityHeaderName, requestId)
