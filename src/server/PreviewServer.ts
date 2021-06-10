@@ -164,7 +164,6 @@ export class PreviewServer {
     }
 
     if (this.options.compileInMemory) {
-      // @ts-expect-error Incompatible types per official example.
       compiler.outputFileSystem = this.memoryFs
     }
 
