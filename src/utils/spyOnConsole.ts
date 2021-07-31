@@ -23,7 +23,10 @@ export type ConsoleMessageType =
   | 'count'
   | 'assert'
 
-export type ConsoleMessages = Map<ConsoleMessageType, string[]>
+export type ConsoleMessagesMap = Map<ConsoleMessageType, string[]>
+
+export type ConsoleMessages = ConsoleMessagesMap &
+  Map<'raw', ConsoleMessagesMap>
 
 function removeConsoleStyles(message: string): string {
   return message.replace(/\(*(%s|%c|color:\S+)\)*\s*/g, '').trim()
@@ -31,16 +34,24 @@ function removeConsoleStyles(message: string): string {
 
 export function spyOnConsole(page: Page): ConsoleMessages {
   const messages: ConsoleMessages = new Map()
+  messages.set('raw', new Map())
 
   log('created a page console spy!')
 
   page.on('console', (message) => {
-    const type = message.type() as ConsoleMessageType
-    const text = removeConsoleStyles(message.text())
+    const messageType = message.type() as ConsoleMessageType
+    const text = message.text()
+    const textWithoutStyles = removeConsoleStyles(message.text())
 
-    log('[%s] %s', type, text)
+    log('[%s] %s', messageType, text)
 
-    messages.set(type, (messages.get(type) || []).concat(text))
+    // Preserve raw console messages.
+    const prevRawMessages = messages.get('raw')?.get(messageType) || []
+    messages.get('raw')?.set(messageType, prevRawMessages.concat(text))
+
+    // Store formatted console messages (without style positionals).
+    const prevMessages = messages.get(messageType) || []
+    messages.set(messageType, prevMessages.concat(textWithoutStyles))
   })
 
   return messages
