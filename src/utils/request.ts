@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 import { Page, Response } from 'playwright'
-import { Headers, headersToObject } from 'headers-utils'
+import { Headers, headersToObject } from 'headers-polyfill'
 import { PreviewServer } from 'src/server/PreviewServer'
 
 export type RequestHelperFn = (

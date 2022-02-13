@@ -2926,10 +2926,10 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-headers-utils@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/headers-utils/-/headers-utils-3.0.2.tgz#dfc65feae4b0e34357308aefbcafa99c895e59ef"
-  integrity sha512-xAxZkM1dRyGV2Ou5bzMxBPNLoRCjcX+ya7KSWybQD2KwLphxsapUVK6x/02o7f4VU6GPSXch9vNY2+gkU8tYWQ==
+headers-polyfill@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/headers-polyfill/-/headers-polyfill-3.0.3.tgz#222bd9a6b5a1f610ad563473efb0d34a13eb7ebc"
+  integrity sha512-Ak5m549Y+5vBtWNnIUcyARJjF0tQpINuy3+vOqG8tK/qjF0itYhAPgrzJc0zsZJh7AX8PalzICMPuWIqHpZlEA==
 
 hosted-git-info@^2.1.4:
   version "2.8.8"

@@ -58,7 +58,7 @@
     "@types/uuid": "^8.3.1",
     "debug": "^4.3.2",
     "express": "^4.17.1",
-    "headers-utils": "^3.0.2",
+    "headers-polyfill": "^3.0.3",
     "memfs": "^3.3.0",
     "mustache": "^4.2.0",
     "playwright": "^1.16.2",
