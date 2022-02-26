@@ -103,7 +103,7 @@ export class PreviewServer {
 
   public async listen(
     port = 0,
-    host = 'localhost',
+    host = '127.0.0.1',
   ): Promise<ServerConnectionInfo> {
     return new Promise((resolve, reject) => {
       this.log('establishing server connection...')
