@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "git@github.com:kettanaito/page-with.git",
+  "homepage": "https://github.com/kettanaito/page-with#readme",
   "author": "Artem Zakharchenko <kettanaito@gmail.com>",
   "license": "MIT",
   "scripts": {
