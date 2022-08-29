@@ -60,7 +60,7 @@
     "debug": "^4.3.2",
     "express": "^4.17.1",
     "headers-polyfill": "^3.0.3",
-    "memfs": "^3.3.0",
+    "memfs": "^3.4.7",
     "mustache": "^4.2.0",
     "playwright": "^1.16.2",
     "uuid": "^8.3.2",
