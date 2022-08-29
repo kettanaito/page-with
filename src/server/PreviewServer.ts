@@ -74,7 +74,7 @@ export class PreviewServer {
 
     if (name === 'webpackConfig') {
       const prevBaseConfig = this.baseWebpackConfig
-      const nextWebpackConfig = value as any
+      const nextWebpackConfig = value as unknown as Configuration
       this.baseWebpackConfig = merge(prevBaseConfig, nextWebpackConfig || {})
     }
   }
