@@ -109,8 +109,11 @@ export class PreviewServer {
       this.log('establishing server connection...')
 
       const connection = this.app.listen(port, host, () => {
-        const { address, port } = connection.address() as AddressInfo
-        const url = `http://${address}:${port}`
+        const { address, port, family } = connection.address() as AddressInfo
+        // IPv6 host requires surrounding square brackets when serialized to URL
+        // note: IPv6 host can take many forms, e.g. `::` and `::1` are both ok
+        const serializedAddress = family === 'IPv6' ? `[${address}]` : address
+        const url = `http://${serializedAddress}:${port}`
         this.connectionInfo = {
           port,
           host: address,
