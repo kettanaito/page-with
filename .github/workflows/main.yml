@@ -11,19 +11,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18]
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.6.0
-        with:
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        uses: bahmutov/npm-install@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          useLockFile: false
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
       - name: Build the library
         run: yarn build
