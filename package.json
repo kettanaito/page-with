@@ -1,6 +1,6 @@
 {
   "name": "page-with",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "A library for usage example-driven in-browser testing of your own libraries.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
