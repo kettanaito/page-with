@@ -1,7 +1,7 @@
 import { v4 } from 'uuid'
 import { Page, Response } from 'playwright'
 import { Headers, headersToObject } from 'headers-polyfill'
-import { PreviewServer } from 'src/server/PreviewServer'
+import { PreviewServer } from '../server/PreviewServer'
 
 export type RequestHelperFn = (
   url: string,
