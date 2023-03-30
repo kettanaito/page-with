@@ -4,30 +4,41 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
-
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [14, 16, 18]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 18
+          always-auth: true
+          registry-url: https://registry.npmjs.org
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.12
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install
 
-      - name: Build the library
-        run: yarn build
+      - name: Build
+        run: pnpm build
 
-      - name: Test the library
-        run: yarn test
+      - name: Tests
+        run: pnpm test
+
+      - name: Release
+        if: github.ref == 'refs/heads/main'
+        run: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

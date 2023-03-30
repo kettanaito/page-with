@@ -9,13 +9,13 @@
   "author": "Artem Zakharchenko <kettanaito@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "tsc -w && yarn copy",
+    "start": "tsc -w && pnpm copy",
     "lint": "eslint ./{src,test}/**/*.ts",
     "clean": "rimraf ./lib",
     "copy": "cpy '**/*' '!**/*.ts' ../lib --cwd=./src --no-overwrite --parents",
-    "build": "yarn lint && yarn clean && tsc && yarn copy",
+    "build": "pnpm lint && pnpm clean && tsc && pnpm copy",
     "test": "jest",
-    "prepublishOnly": "yarn build && yarn test"
+    "release": "release publish"
   },
   "files": [
     "lib",

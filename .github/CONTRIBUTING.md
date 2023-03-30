@@ -4,7 +4,7 @@ Thank you for considering contributing to this library! Below you can find the i
 
 ## Pre-requisites
 
-- [Yarn](https://classic.yarnpkg.com/)
+- [PNPM](https://pnpm.io/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Jest](https://jestjs.io/)
 
@@ -31,7 +31,7 @@ Once your changes are ready, open a Pull request and assign one of the library m
 ## Develop
 
 ```bash
-$ yarn start
+$ pnpm start
 ```
 
 ## Test
@@ -39,21 +39,15 @@ $ yarn start
 ### Run all tests
 
 ```bash
-$ yarn test
+$ pnpm test
 ```
 
 ### Run a single test
 
 ```bash
-$ yarn test test/add.test.ts
+$ pnpm test test/add.test.ts
 ```
 
 ## Publish
 
-Follow this instructions to publish the library:
-
-1. Log in with your [NPM](http://npmjs.com/) account (verify your current user with `npm whoami`).
-1. Run `yarn publish`.
-1. Set the next version of the library.
-1. Wait for the build to succeed.
-1. Push the release commit and tag with `git push --follow-tags`.
+This package is published automatically upon each merge to the `main` branch.
