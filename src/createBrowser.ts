@@ -39,11 +39,13 @@ export async function createBrowser(
   log('spawning a server...')
 
   server = new PreviewServer(options.serverOptions)
-  const [serverError, connection] = await until(() => server.listen())
+  const serverConnection = await until(() => server.listen())
 
-  if (serverError) {
-    throw new Error(`Failed to create a server.\n${serverError}`)
+  if (serverConnection.error) {
+    throw new Error(`Failed to create a server.\n${serverConnection.error}`)
   }
+
+  const connection = serverConnection.data
 
   log('successfully spawned the server!', connection.url)
 
