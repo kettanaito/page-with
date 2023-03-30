@@ -34,6 +34,7 @@
     }
   },
   "devDependencies": {
+    "@ossjs/release": "^0.5.1",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.6",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
