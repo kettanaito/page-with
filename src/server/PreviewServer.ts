@@ -172,12 +172,14 @@ export class PreviewServer {
       compiler.outputFileSystem = this.memoryFs
     }
 
-    const [compilationError, stats] = await until(() => asyncCompile(compiler))
+    const compilationResult = await until(() => asyncCompile(compiler))
 
-    if (compilationError) {
+    if (compilationResult.error) {
       this.log('failed to compile', absoluteEntryPath)
-      throw compilationError
+      throw compilationResult.error
     }
+
+    const stats = compilationResult.data
 
     const { chunks } = stats.compilation
 
